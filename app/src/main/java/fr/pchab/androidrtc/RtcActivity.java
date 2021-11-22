@@ -7,9 +7,14 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager.LayoutParams;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -48,7 +53,13 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
     private VideoRenderer.Callbacks remoteRender;
     private WebRtcClient client;
     private String mSocketAddress;
-    private String callerId;
+    private String callerId; //todo ousy 对方的id
+
+    LinearLayout mSettingLl;
+    private TextView mStateTv;
+    private EditText mIpEt;
+    private EditText mPortEt;
+    private EditText mCallerEt;
 
     private static final String[] RequiredPermissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
     protected PermissionChecker permissionChecker = new PermissionChecker();
@@ -64,8 +75,12 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
                         | LayoutParams.FLAG_SHOW_WHEN_LOCKED
                         | LayoutParams.FLAG_TURN_SCREEN_ON);
         setContentView(R.layout.main);
-        mSocketAddress = "http://" + getResources().getString(R.string.host);
-        mSocketAddress += (":" + getResources().getString(R.string.port) + "/");
+
+        mSettingLl = findViewById(R.id.ll_setting);
+        mStateTv = findViewById(R.id.tv_state);
+        mIpEt = findViewById(R.id.et_ip);
+        mPortEt = findViewById(R.id.et_port);
+        mCallerEt = findViewById(R.id.et_callerId);
 
         vsv = (GLSurfaceView) findViewById(R.id.glview_call);
         vsv.setPreserveEGLContextOnPause(true);
@@ -73,7 +88,7 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
         VideoRendererGui.setView(vsv, new Runnable() {
             @Override
             public void run() {
-                init();
+//                init();
             }
         });
 
@@ -92,6 +107,7 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
             final List<String> segments = intent.getData().getPathSegments();
             callerId = segments.get(0);
         }
+
         checkPermissions();
     }
 
@@ -110,7 +126,15 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
         });
     }
 
+    public void onConnectClick(View view) {
+        init();
+    }
+
     private void init() {
+        callerId = mCallerEt.getText().toString();
+        mSocketAddress = "http://" + mIpEt.getText().toString();
+        mSocketAddress += (":" + mPortEt.getText().toString() + "/");
+
         Point displaySize = new Point();
         getWindowManager().getDefaultDisplay().getSize(displaySize);
         // todo ousy android 6要改成15
@@ -147,8 +171,24 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
     }
 
     @Override
+    public void onConnectFail() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mStateTv.setText("连接失败");
+            }
+        });
+    }
+
+    @Override
     public void onCallReady(String callId) {
-        if (callerId != null) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mStateTv.setText("已连接");
+            }
+        });
+        if (!TextUtils.isEmpty(callerId)) {
             try {
                 answer(callerId);
             } catch (JSONException e) {
@@ -228,5 +268,9 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         permissionChecker.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public void onMoreClick(View view) {
+        mSettingLl.setVisibility(mSettingLl.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
     }
 }

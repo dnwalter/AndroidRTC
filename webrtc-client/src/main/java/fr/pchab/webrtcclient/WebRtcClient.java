@@ -1,6 +1,5 @@
 package fr.pchab.webrtcclient;
 
-import android.opengl.EGLContext;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -45,6 +44,8 @@ public class WebRtcClient {
      * Implement this interface to be notified of events.
      */
     public interface RtcListener {
+        void onConnectFail();
+
         void onCallReady(String callId); // 连上服务器时
 
         void onStatusChanged(String newStatus);
@@ -169,6 +170,15 @@ public class WebRtcClient {
             public void call(Object... args) {
                 String id = (String) args[0];
                 mListener.onCallReady(id);
+            }
+        };
+
+        private Emitter.Listener connectListener = new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                // 不断的话，每10秒都会尝试一次重连，每10秒就进一次这里
+                client.disconnect();
+                mListener.onConnectFail();
             }
         };
     }
@@ -301,8 +311,9 @@ public class WebRtcClient {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        client.on("id", messageHandler.onId);
-        client.on("message", messageHandler.onMessage);
+        client.on(Socket.EVENT_CONNECT_ERROR, messageHandler.connectListener)
+                .on("id", messageHandler.onId)
+                .on(Socket.EVENT_MESSAGE, messageHandler.onMessage);
         client.connect();
 
         iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
