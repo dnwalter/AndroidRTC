@@ -10,6 +10,7 @@ import com.github.nkzawa.socketio.client.Socket;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.AudioSource;
+import org.webrtc.CameraEnumerationAndroid;
 import org.webrtc.DataChannel;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;
@@ -44,7 +45,7 @@ public class WebRtcClient {
      * Implement this interface to be notified of events.
      */
     public interface RtcListener {
-        void onCallReady(String callId);
+        void onCallReady(String callId); // 连上服务器时
 
         void onStatusChanged(String newStatus);
 
@@ -216,6 +217,11 @@ public class WebRtcClient {
         }
 
         @Override
+        public void onIceConnectionReceivingChange(boolean b) {
+
+        }
+
+        @Override
         public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
         }
 
@@ -282,11 +288,11 @@ public class WebRtcClient {
         endPoints[peer.endPoint] = false;
     }
 
-    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params, EGLContext mEGLcontext) {
+    public WebRtcClient(RtcListener listener, String host, PeerConnectionParameters params) {
         mListener = listener;
         pcParams = params;
         PeerConnectionFactory.initializeAndroidGlobals(listener, true, true,
-                params.videoCodecHwAcceleration, mEGLcontext);
+                params.videoCodecHwAcceleration);
         factory = new PeerConnectionFactory();
         MessageHandler messageHandler = new MessageHandler();
 
@@ -380,7 +386,32 @@ public class WebRtcClient {
     }
 
     private VideoCapturer getVideoCapturer() {
-        String frontCameraDeviceName = VideoCapturerAndroid.getNameOfFrontFacingDevice();
-        return VideoCapturerAndroid.create(frontCameraDeviceName);
+        String frontCameraDeviceName = CameraEnumerationAndroid.getNameOfFrontFacingDevice();
+        return VideoCapturerAndroid.create(frontCameraDeviceName, new VideoCapturerAndroid.CameraEventsHandler() {
+            @Override
+            public void onCameraError(String s) {
+
+            }
+
+            @Override
+            public void onCameraFreezed(String s) {
+
+            }
+
+            @Override
+            public void onCameraOpening(int i) {
+
+            }
+
+            @Override
+            public void onFirstFrameAvailable() {
+
+            }
+
+            @Override
+            public void onCameraClosed() {
+
+            }
+        });
     }
 }
