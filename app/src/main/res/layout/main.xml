@@ -10,10 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <android.view.SurfaceView
-        android:id="@+id/preview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+<!--    <android.view.SurfaceView-->
+<!--        android:id="@+id/preview"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent" />-->
 
     <LinearLayout
         android:id="@+id/ll_setting"
@@ -76,6 +76,13 @@
             android:layout_gravity="right"
             android:onClick="onConnectClick"
             android:text="连接服务器" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:onClick="onRefreshClick"
+            android:text="刷新列表" />
 
     </LinearLayout>
 

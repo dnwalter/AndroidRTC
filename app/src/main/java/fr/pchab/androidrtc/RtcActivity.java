@@ -253,7 +253,7 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
         VideoRendererGui.update(localRender,
                 LOCAL_X_CONNECTED, LOCAL_Y_CONNECTED,
                 LOCAL_WIDTH_CONNECTED, LOCAL_HEIGHT_CONNECTED,
-                scalingType, false);
+                scalingType, true);
     }
 
     @Override
@@ -261,7 +261,7 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
         VideoRendererGui.update(localRender,
                 LOCAL_X_CONNECTING, LOCAL_Y_CONNECTING,
                 LOCAL_WIDTH_CONNECTING, LOCAL_HEIGHT_CONNECTING,
-                scalingType, false);
+                scalingType, true);
     }
 
     @Override
@@ -272,5 +272,9 @@ public class RtcActivity extends Activity implements WebRtcClient.RtcListener {
 
     public void onMoreClick(View view) {
         mSettingLl.setVisibility(mSettingLl.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    public void onRefreshClick(View view) {
+        client.refreshUsers();
     }
 }

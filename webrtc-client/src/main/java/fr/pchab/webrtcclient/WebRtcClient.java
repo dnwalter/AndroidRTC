@@ -377,6 +377,11 @@ public class WebRtcClient {
         }
     }
 
+    // 获取已连上服务器的Users
+    public void refreshUsers() {
+        client.emit("refreshids", new JSONObject());
+    }
+
     private void setCamera() {
         localMS = factory.createLocalMediaStream("ARDAMS");
         if (pcParams.videoCallEnabled) {
